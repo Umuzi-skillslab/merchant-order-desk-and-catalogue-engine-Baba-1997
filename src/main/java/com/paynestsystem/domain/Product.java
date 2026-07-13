@@ -1,5 +1,5 @@
-//Product catalogue
-//Product class
+package com.paynestsystem.domain;
+
 public class Product {
 
     private int id;

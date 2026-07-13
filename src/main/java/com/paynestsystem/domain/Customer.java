@@ -1,3 +1,5 @@
+package com.paynestsystem.domain;
+
 public class Customer {
 
     private int id;
