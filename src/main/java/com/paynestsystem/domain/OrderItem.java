@@ -1,15 +1,24 @@
 package com.paynestsystem.domain;
 
-public class OrderItem {
+import java.math.BigDecimal;
 
+public final class OrderItem {
 
-    private Product product;
-    private int quantity;
+    private final Product product;
+    private final int quantity;
 
     public OrderItem(Product product, int quantity) {
 
+        if (product == null) {
+            throw new IllegalArgumentException(
+                    "Product cannot be null"
+            );
+        }
+
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0");
+            throw new IllegalArgumentException(
+                    "Quantity must be greater than 0"
+            );
         }
 
         this.product = product;
@@ -24,7 +33,8 @@ public class OrderItem {
         return quantity;
     }
 
-    public double calculateTotal() {
-        return product.getPrice() * quantity;
+    public BigDecimal calculateTotal() {
+        return product.getPrice()
+                .multiply(BigDecimal.valueOf(quantity));
     }
 }

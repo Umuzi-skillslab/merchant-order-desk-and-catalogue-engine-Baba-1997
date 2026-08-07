@@ -1,38 +1,79 @@
 package com.paynestsystem.domain;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.Test;
 
-public class OrderItemTest {
+import java.math.BigDecimal;
 
-    @Test
-    void shouldCalculateTotalCorrectly() {
-        Product product = new Product(1, "Laptop", 12000);
+import static org.junit.jupiter.api.Assertions.*;
 
-        OrderItem item = new OrderItem(product, 2);
+class OrderItemTest {
 
-        assertEquals(24000, item.calculateTotal());
-    }
 
-    @Test
-    void shouldRejectZeroQuantity() {
-        Product product = new Product(1, "Laptop", 12000);
+@Test
+void shouldCreateOrderItemWithValidDetails() {
+    Product product = new Product(
+            1,
+            "Laptop",
+            new BigDecimal("10000.00")
+    );
 
-        assertThrows(
+    OrderItem item = new OrderItem(product, 2);
+
+    assertEquals(product, item.getProduct());
+    assertEquals(2, item.getQuantity());
+}
+
+@Test
+void shouldRejectNullProduct() {
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> new OrderItem(null, 1)
+    );
+}
+
+@Test
+void shouldRejectZeroQuantity() {
+    Product product = new Product(
+            1,
+            "Laptop",
+            new BigDecimal("10000.00")
+    );
+
+    assertThrows(
             IllegalArgumentException.class,
             () -> new OrderItem(product, 0)
-        );
-    }
+    );
+}
 
-    @Test
-    void shouldRejectNegativeQuantity() {
-        Product product = new Product(1, "Laptop", 12000);
+@Test
+void shouldRejectNegativeQuantity() {
+    Product product = new Product(
+            1,
+            "Laptop",
+            new BigDecimal("10000.00")
+    );
 
-        assertThrows(
+    assertThrows(
             IllegalArgumentException.class,
             () -> new OrderItem(product, -1)
-        );
-    }
+    );
+}
+
+@Test
+void shouldCalculateTotalCorrectly() {
+    Product product = new Product(
+            1,
+            "Laptop",
+            new BigDecimal("10000.00")
+    );
+
+    OrderItem item = new OrderItem(product, 3);
+
+    assertEquals(
+            new BigDecimal("30000.00"),
+            item.calculateTotal()
+    );
+}
+
+
 }

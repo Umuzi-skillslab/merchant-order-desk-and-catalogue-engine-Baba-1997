@@ -1,12 +1,39 @@
 package com.paynestsystem.domain;
 
-public class Product {
+import java.math.BigDecimal;
+import java.util.Objects;
 
-    private int id;
-    private String name;
-    private double price;
+public final class Product {
 
-    public Product(int id, String name, double price) {
+    private final int id;
+    private final String name;
+    private final BigDecimal price;
+
+    public Product(int id, String name, BigDecimal price) {
+
+        if (id <= 0) {
+            throw new IllegalArgumentException(
+                    "Product ID must be greater than 0"
+            );
+        }
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Product name cannot be empty"
+            );
+        }
+
+        Objects.requireNonNull(
+                price,
+                "Product price cannot be null"
+        );
+
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException(
+                    "Product price cannot be negative"
+            );
+        }
+
         this.id = id;
         this.name = name;
         this.price = price;
@@ -20,8 +47,7 @@ public class Product {
         return name;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 }
-
