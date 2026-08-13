@@ -4,6 +4,8 @@ package com.paynestsystem.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import com.paynestsystem.payment.PaymentMethod;
+import com.paynestsystem.payment.PaymentProcessor;
 
 public final class Order {
 
@@ -58,7 +60,11 @@ public final class Order {
 
         return total;
     }
-
+    public boolean checkout(PaymentMethod paymentMethod) {
+        BigDecimal total = calculateTotal();
+        PaymentProcessor processor = new PaymentProcessor();
+       return processor.processPayment(paymentMethod, total);
+}
     public int getId() {
         return id;
     }
