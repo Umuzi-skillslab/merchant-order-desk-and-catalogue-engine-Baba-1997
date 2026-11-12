@@ -1,8 +1,8 @@
-# Merchant Order Desk
+# PayNest Merchant Order Desk and Unified Checkout
 
 ## About
 
-This is a Java project built for the PayNest Merchant Order Desk Capstone.
+This Java application was built for the PayNest Merchant Order Desk (Capstone 1) and extended with unified checkout for card, EFT, and wallet payments (Capstone 3).
 
 The application allows a merchant to:
 
@@ -19,7 +19,7 @@ The application allows a merchant to:
 - Java 21
 - Maven
 - JUnit 5
-- Vs Code
+- VS Code
 
 ## Project Structure
 
@@ -53,11 +53,11 @@ src
 
 ### Payment Classes
 
-- `PaymentMethod` - interface defining the payment contract (`processPayment`, `getPaymentType`).
-- `CardPayment` - processes a payment via card.
-- `EftPayment` - processes a payment via EFT.
-- `WalletPayment` - processes a payment via wallet.
-- `PaymentProcessor` - runs a payment against any `PaymentMethod` and reports success/failure.
+- `PaymentMethod` - defines `processPayment(BigDecimal amount)` and `getPaymentType()`.
+- `CardPayment` - simulates a card payment and returns `"CARD"` as its payment label.
+- `EftPayment` - simulates an EFT payment and returns `"EFT"` as its payment label.
+- `WalletPayment` - simulates a wallet payment and returns `"WALLET"` as its payment label.
+- `PaymentProcessor` - calls the selected payment method and reports whether the payment succeeded.
 
 ## Payment Design
 
@@ -67,19 +67,13 @@ Payments are built around polymorphism rather than branching on payment type.
 `getPaymentType()`. `CardPayment`, `EftPayment`, and `WalletPayment` each implement this
 interface independently, providing their own behaviour for each rail.
 
-`PaymentProcessor` and `Order.checkout(PaymentMethod paymentMethod)` both depend only on the
-`PaymentMethod` interface, never on a specific payment class. This means there is no
-`if`/`else` or `switch` statement anywhere deciding which payment type is being used — Java
-resolves the correct implementation automatically at runtime (dynamic dispatch), based on the
-actual object passed in.
+`PaymentProcessor.processPayment()` and `Order.checkout()` both accept a `PaymentMethod`. At runtime, Java calls the implementation for the payment object passed in, such as `CardPayment`, `EftPayment`, or `WalletPayment`.
 
 The benefit: adding a new payment rail (for example, a future `BuyNowPayLaterPayment`) only
 requires creating one new class that implements `PaymentMethod`. No existing code in
 `PaymentProcessor` or `Order` needs to change.
 
-`Order.checkout()` reuses the existing `calculateTotal()` method from the order's line items,
-converts nothing, and passes that real `BigDecimal` total directly into `PaymentProcessor` —
-the amount used for payment is always the order's actual total, never a hardcoded value.
+`Order.checkout()` calls `calculateTotal()` to add up the order's line items, then passes the resulting `BigDecimal` total to `PaymentProcessor` as the payment amount.
 
 ## Run the Project
 
@@ -104,7 +98,7 @@ mvn clean test
 ### Test Result
 
 ```text
-Tests run: 29
+Tests run: 31
 Failures: 0
 Errors: 0
 BUILD SUCCESS

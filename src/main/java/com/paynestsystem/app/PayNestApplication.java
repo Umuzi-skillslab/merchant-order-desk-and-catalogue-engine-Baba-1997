@@ -9,8 +9,6 @@ import com.paynestsystem.domain.Product;
 import com.paynestsystem.presentation.OrderSummaryPrinter;
 import com.paynestsystem.service.OrderService;
 import com.paynestsystem.payment.PaymentMethod;
-import com.paynestsystem.payment.CardPayment;
-import com.paynestsystem.payment.EftPayment;
 import com.paynestsystem.payment.WalletPayment;
 
 public class PayNestApplication {
@@ -45,7 +43,9 @@ public class PayNestApplication {
 
                 System.out.println(printer.print(order));
                 PaymentMethod paymentMethod = new WalletPayment();
-                order.checkout(paymentMethod);
+               if (order.checkout(paymentMethod)) {
+                 System.out.println("Order " + order.getId() + " completed.");
+}
 
         }
 }

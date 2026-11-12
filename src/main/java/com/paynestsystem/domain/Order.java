@@ -61,6 +61,9 @@ public final class Order {
         return total;
     }
     public boolean checkout(PaymentMethod paymentMethod) {
+        if(paymentMethod == null){
+            throw new IllegalArgumentException("Payment method is required");
+        }
         BigDecimal total = calculateTotal();
         PaymentProcessor processor = new PaymentProcessor();
        return processor.processPayment(paymentMethod, total);
