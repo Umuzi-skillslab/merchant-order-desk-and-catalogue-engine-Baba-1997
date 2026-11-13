@@ -2,17 +2,15 @@
 
 ## About
 
-This Java application was built for the PayNest Merchant Order Desk (Capstone 1) and extended with unified checkout for card, EFT, and wallet payments (Capstone 3).
+This Java application was built for the PayNest Merchant Order Desk (Capstone 1) and extended with unified checkout for Card, EFT, and Wallet payments (Capstone 3).
 
 The application allows a merchant to:
 
-- Create customers and products
-- Create orders
-- Add products to orders
-- Calculate order totals
-- Display an order summary
-- Validate incorrect information
-- Check out an order using different payment methods (Card, EFT, Wallet)
+- Create customers, products, and orders.
+- Add products to orders and calculate order totals.
+- Display order summaries.
+- Validate customer, product, order, and payment information.
+- Check out an order using Card, EFT, or Wallet.
 
 ## Technologies
 
@@ -25,92 +23,66 @@ The application allows a merchant to:
 
 ```text
 src
-├── main
-│   └── java
-│       └── com.paynestsystem
-│           ├── app
-│           ├── domain
-│           ├── payment
-│           ├── presentation
-│           └── service
-│
-└── test
-    └── java
-        └── com.paynestsystem
-            ├── domain
-            └── payment
+├── main/java/com/paynestsystem
+│   ├── app
+│   ├── domain
+│   ├── payment
+│   ├── presentation
+│   └── service
+└── test/java/com/paynestsystem
+    ├── domain
+    └── payment
 ```
 
 ### Main Classes
 
-- `Customer` - stores customer information.
-- `Product` - stores product information and price.
-- `OrderItem` - connects a product to a quantity.
-- `Order` - manages order items, calculates totals, and handles checkout.
-- `OrderService` - creates orders.
-- `OrderSummaryPrinter` - displays the order summary.
-- `PayNestApplication` - runs the application.
+- `Customer` stores customer information.
+- `Product` stores product information and price.
+- `OrderItem` associates a product with a quantity and calculates the line total.
+- `Order` manages order items, calculates the order total, and handles checkout.
+- `OrderService` creates orders.
+- `OrderSummaryPrinter` formats the order summary.
+- `PayNestApplication` runs the checkout demo.
 
 ### Payment Classes
 
-- `PaymentMethod` - defines `processPayment(BigDecimal amount)` and `getPaymentType()`.
-- `CardPayment` - simulates a card payment and returns `"CARD"` as its payment label.
-- `EftPayment` - simulates an EFT payment and returns `"EFT"` as its payment label.
-- `WalletPayment` - simulates a wallet payment and returns `"WALLET"` as its payment label.
-- `PaymentProcessor` - calls the selected payment method and reports whether the payment succeeded.
+- `PaymentMethod` defines `boolean processPayment(double amount)` and `String getPaymentType()`.
+- `CardPayment` validates card details and simulates a card payment.
+- `EftPayment` simulates an EFT payment.
+- `WalletPayment` checks the available balance and deducts the charge when funds are sufficient.
+- `PaymentProcessor` calls the selected payment method, prints the result, and returns whether the payment succeeded.
 
 ## Payment Design
 
-Payments are built around polymorphism rather than branching on payment type.
-
-`PaymentMethod` is an interface with two methods: `processPayment(BigDecimal amount)` and
-`getPaymentType()`. `CardPayment`, `EftPayment`, and `WalletPayment` each implement this
-interface independently, providing their own behaviour for each rail.
-
-`PaymentProcessor.processPayment()` and `Order.checkout()` both accept a `PaymentMethod`. At runtime, Java calls the implementation for the payment object passed in, such as `CardPayment`, `EftPayment`, or `WalletPayment`.
-
-The benefit: adding a new payment rail (for example, a future `BuyNowPayLaterPayment`) only
-requires creating one new class that implements `PaymentMethod`. No existing code in
-`PaymentProcessor` or `Order` needs to change.
-
-`Order.checkout()` calls `calculateTotal()` to add up the order's line items, then passes the resulting `BigDecimal` total to `PaymentProcessor` as the payment amount.
+`Order.checkout(PaymentMethod)` calculates the order total as a `BigDecimal` and converts it to `double` when passing it to `PaymentProcessor`. The processor calls the selected implementation through the `PaymentMethod` interface. This keeps checkout logic in one place while each payment class handles its own rules. Adding a payment method, such as `BuyNowPayLaterPayment`, requires implementing the interface and selecting that implementation in the application.
 
 ## Payment Validation
 
-- `Order.checkout()` requires a payment method. `PaymentProcessor` requires a payment amount greater than zero. These rules apply to Card, EFT, and Wallet.
-- `CardPayment` requires a card number with exactly 16 digits after removing spaces, an expiry month of the current month or later, and three-digit CVV.
-  -Payments are simulated. Use dummy card details for testing and demonstration.
+- Checkout requires a payment method and a finite amount greater than zero.
+- Card payment requires exactly 16 digits after removing spaces, an expiry of the current month or later, and a three-digit CVV.
+- Wallet payment stores the balance as a `BigDecimal` and converts the charge using `BigDecimal.valueOf(amount)`. If the charge exceeds the balance, checkout returns `false` and the wallet retains its full balance. If funds are sufficient, the wallet deducts the charge.
+- Payments are simulated. Use dummy card details for testing and demonstration.
 
 ## Run the Project
 
-Compile:
+From the project root, run the demo:
 
-```bash
-mvn clean compile
+```powershell
+mvn clean compile exec:java "-Dexec.mainClass=com.paynestsystem.app.PayNestApplication"
 ```
 
-Run:
+The demo prints the summary for Order 101, pays the R12,700.00 total from a wallet with a R13,000.00 starting balance, and prints `Order 101 completed.`
 
-```bash
-mvn compile exec:java "-Dexec.mainClass=com.paynestsystem.app.PayNestApplication"
+## Run the Tests
+
+```powershell
+mvn test
 ```
 
-The demo displays order `101`, calculates a total of `R12 700,00`, and completes the order after a successful simulated Wallet payment.
-
-Run tests:
-
-```bash
-mvn clean test
-```
-
-### Test Result
-
-Run `mvn test` from the project root.All 35 tests passed, including test for a missing payment method, a zero-totalorder, a short card number, an expired card, and an invalid CVV.
+The tests cover successful checkout with Card, EFT, and Wallet, verify that checkout passes the calculated total to the payment method, and check payment failures and invalid inputs. The wallet decline test confirms that a R500 wallet refuses a R600 order and retains its R500 balance.
 
 ```text
-Tests run: 35
-Failures: 0
-Errors: 0
+Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 

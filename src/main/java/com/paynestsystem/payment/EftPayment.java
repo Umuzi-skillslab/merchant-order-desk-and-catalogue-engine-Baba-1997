@@ -1,12 +1,11 @@
 package com.paynestsystem.payment;
 
-import java.math.BigDecimal;
 
 public class EftPayment implements PaymentMethod {
 
     @Override
-    public boolean  processPayment(BigDecimal amount){
-     System.out.println("processing eft payment of amount " + amount);
+    public boolean  processPayment(double amount){
+     System.out.println("Processing EFT payment of R" + String.format("%.2f", amount));
         return true;
     }
 

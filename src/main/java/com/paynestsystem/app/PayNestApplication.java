@@ -42,8 +42,8 @@ public class PayNestApplication {
                 OrderSummaryPrinter printer = new OrderSummaryPrinter();
 
                 System.out.println(printer.print(order));
-                PaymentMethod paymentMethod = new WalletPayment();
-               if (order.checkout(paymentMethod)) {
+                PaymentMethod paymentMethod = new WalletPayment(new BigDecimal("13000.00"));
+                 if (order.checkout(paymentMethod)) {
                  System.out.println("Order " + order.getId() + " completed.");
 }
 

@@ -1,23 +1,21 @@
 package com.paynestsystem.payment;
 
-import java.math.BigDecimal;
-
 public class TestPaymentMethod implements PaymentMethod {
-   private BigDecimal receivedAmount;
 
-   @Override
-   public boolean processPayment(BigDecimal amount) {
-    this.receivedAmount = amount;
-    return true;
+    private double receivedAmount;
 
-   }
-   @Override
-   public String getPaymentType() {
-    return "TEST";
-   }
+    @Override
+    public boolean processPayment(double amount) {
+        this.receivedAmount = amount;
+        return true;
+    }
 
- public BigDecimal getReceivedAmount(){
-    return receivedAmount;
- }
+    @Override
+    public String getPaymentType() {
+        return "TEST";
+    }
 
+    public double getReceivedAmount() {
+        return receivedAmount;
+    }
 }
