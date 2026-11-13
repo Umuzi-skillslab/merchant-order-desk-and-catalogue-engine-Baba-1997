@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 public class PaymentProcessor {
 
     public boolean processPayment(PaymentMethod paymentMethod, BigDecimal amount) {
+
+         if(amount == null || amount.signum() <=0){
+        throw new IllegalArgumentException("Payment amount must be greater than zero");
+    }
         boolean success = paymentMethod.processPayment(amount);
 
         if (success) {

@@ -75,6 +75,12 @@ requires creating one new class that implements `PaymentMethod`. No existing cod
 
 `Order.checkout()` calls `calculateTotal()` to add up the order's line items, then passes the resulting `BigDecimal` total to `PaymentProcessor` as the payment amount.
 
+## Payment Validation
+
+- `Order.checkout()` requires a payment method. `PaymentProcessor` requires a payment amount greater than zero. These rules apply to Card, EFT, and Wallet.
+- `CardPayment` requires a card number with exactly 16 digits after removing spaces, an expiry month of the current month or later, and three-digit CVV.
+  -Payments are simulated. Use dummy card details for testing and demonstration.
+
 ## Run the Project
 
 Compile:
@@ -89,6 +95,8 @@ Run:
 mvn compile exec:java "-Dexec.mainClass=com.paynestsystem.app.PayNestApplication"
 ```
 
+The demo displays order `101`, calculates a total of `R12 700,00`, and completes the order after a successful simulated Wallet payment.
+
 Run tests:
 
 ```bash
@@ -97,8 +105,10 @@ mvn clean test
 
 ### Test Result
 
+Run `mvn test` from the project root.All 35 tests passed, including test for a missing payment method, a zero-totalorder, a short card number, an expired card, and an invalid CVV.
+
 ```text
-Tests run: 31
+Tests run: 35
 Failures: 0
 Errors: 0
 BUILD SUCCESS
