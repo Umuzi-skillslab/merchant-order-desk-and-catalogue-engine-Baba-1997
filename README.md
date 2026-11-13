@@ -60,6 +60,7 @@ src
 
 - Checkout requires a payment method and a finite amount greater than zero.
 - Card payment requires exactly 16 digits after removing spaces, an expiry of the current month or later, and a three-digit CVV.
+- The `WalletPayment` constructor accepts a starting balance of zero or more and throws an `IllegalArgumentException` for a `null` or negative starting balance.
 - Wallet payment stores the balance as a `BigDecimal` and converts the charge using `BigDecimal.valueOf(amount)`. If the charge exceeds the balance, checkout returns `false` and the wallet retains its full balance. If funds are sufficient, the wallet deducts the charge.
 - Payments are simulated. Use dummy card details for testing and demonstration.
 

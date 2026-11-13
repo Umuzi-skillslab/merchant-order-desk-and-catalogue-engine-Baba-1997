@@ -7,6 +7,10 @@ public class WalletPayment implements PaymentMethod {
     private BigDecimal balance;
 
     public WalletPayment(BigDecimal startingBalance) {
+        if (startingBalance == null || startingBalance.signum() < 0) {
+            throw new IllegalArgumentException("Starting balance must be zero or greater");
+        }
+
         this.balance = startingBalance;
     }
 
