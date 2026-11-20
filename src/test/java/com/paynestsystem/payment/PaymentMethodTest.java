@@ -124,4 +124,23 @@ public class PaymentMethodTest {
         assertFalse(order.checkout(wallet));
         assertEquals(0, new BigDecimal("500.00").compareTo(wallet.getBalance()));
     }
+
+    @Test
+    void checkoutRejectsOrderTotalThatLosesPrecisionBeforeCallingPayment() {
+        Customer customer = new Customer(1, "Test Customer", "test@umuzi.org");
+        Order order = new Order(1, customer);
+        order.addItem(new Product(1, "Large order", new BigDecimal("9007199254740992")), 1);
+
+        TestPaymentMethod acceptedPayment = new TestPaymentMethod();
+
+        assertTrue(order.checkout(acceptedPayment));
+        assertEquals(0, order.calculateTotal()
+                .compareTo(BigDecimal.valueOf(acceptedPayment.getReceivedAmount())));
+
+        order.addItem(new Product(2, "Extra item", BigDecimal.ONE), 1);
+        TestPaymentMethod rejectedPayment = new TestPaymentMethod();
+
+        assertThrows(IllegalArgumentException.class, () -> order.checkout(rejectedPayment));
+        assertEquals(0.0, rejectedPayment.getReceivedAmount());
+    }
 }

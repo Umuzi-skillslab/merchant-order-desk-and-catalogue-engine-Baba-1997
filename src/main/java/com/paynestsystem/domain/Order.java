@@ -56,8 +56,15 @@ public final class Order {
         }
 
         BigDecimal total = calculateTotal();
+        double amount = total.doubleValue();
+
+        if (!Double.isFinite(amount) || BigDecimal.valueOf(amount).compareTo(total) != 0) {
+            throw new IllegalArgumentException(
+                    "Order total cannot be represented accurately by the payment amount");
+        }
+
         PaymentProcessor processor = new PaymentProcessor();
-        return processor.processPayment(paymentMethod, total.doubleValue());
+        return processor.processPayment(paymentMethod, amount);
     }
 
     public int getId() {

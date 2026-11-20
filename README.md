@@ -4,7 +4,7 @@
 
 This Java application was built for the PayNest Merchant Order Desk (Capstone 1) and extended with unified checkout for Card, EFT, and Wallet payments (Capstone 3).
 
-The application allows a merchant to:
+The application allows a merchant to do the following.
 
 - Create customers, products, and orders.
 - Add products to orders and calculate order totals.
@@ -15,7 +15,7 @@ The application allows a merchant to:
 ## Technologies
 
 - Java 21
-- Maven
+- Maven with Surefire 3.5.4
 - JUnit 5
 - VS Code
 
@@ -54,11 +54,14 @@ src
 
 ## Payment Design
 
-`Order.checkout(PaymentMethod)` calculates the order total as a `BigDecimal` and converts it to `double` when passing it to `PaymentProcessor`. The processor calls the selected implementation through the `PaymentMethod` interface. This keeps checkout logic in one place while each payment class handles its own rules. Adding a payment method, such as `BuyNowPayLaterPayment`, requires implementing the interface and selecting that implementation in the application.
+`Order.checkout(PaymentMethod)` calculates the order total as a `BigDecimal`. It converts the total to a `double` because the payment interface requires one. Before calling `PaymentProcessor`, checkout checks that converting the `double` back with `BigDecimal.valueOf(amount)` gives the same numeric value as the original total.
+
+The processor calls the selected implementation through the `PaymentMethod` interface. This keeps checkout logic in one place while each payment class handles its own rules. Adding a payment method, such as `BuyNowPayLaterPayment`, requires implementing the interface and selecting that implementation in the application.
 
 ## Payment Validation
 
 - Checkout requires a payment method and a finite amount greater than zero.
+- If converting the order total to `double` and back changes its numeric value, checkout throws an `IllegalArgumentException` before calling the payment method.
 - Card payment requires exactly 16 digits after removing spaces, an expiry of the current month or later, and a three-digit CVV.
 - The `WalletPayment` constructor accepts a starting balance of zero or more and throws an `IllegalArgumentException` for a `null` or negative starting balance.
 - Wallet payment stores the balance as a `BigDecimal` and converts the charge using `BigDecimal.valueOf(amount)`. If the charge exceeds the balance, checkout returns `false` and the wallet retains its full balance. If funds are sufficient, the wallet deducts the charge.
@@ -66,13 +69,13 @@ src
 
 ## Run the Project
 
-From the project root, run the demo:
+Run the demo from the project root.
 
 ```powershell
 mvn clean compile exec:java "-Dexec.mainClass=com.paynestsystem.app.PayNestApplication"
 ```
 
-The demo prints the summary for Order 101, pays the R12,700.00 total from a wallet with a R13,000.00 starting balance, and prints `Order 101 completed.`
+The demo prints the summary for Order 101, pays the R12,700.00 total from a wallet with a R13,000.00 starting balance, and prints `Order 101 completed.` after payment succeeds.
 
 ## Run the Tests
 
@@ -80,10 +83,10 @@ The demo prints the summary for Order 101, pays the R12,700.00 total from a wall
 mvn test
 ```
 
-The tests cover successful checkout with Card, EFT, and Wallet, verify that checkout passes the calculated total to the payment method, and check payment failures and invalid inputs. The wallet decline test confirms that a R500 wallet refuses a R600 order and retains its R500 balance.
+The tests cover successful checkout with Card, EFT, and Wallet, verify that checkout passes the calculated total to the payment method, and check payment failures and invalid inputs. The wallet decline test confirms that a R500 wallet refuses a R600 order and retains its R500 balance. The precision boundary test verifies that checkout accepts R9,007,199,254,740,992 and rejects the total after adding R1, before calling the payment method.
 
 ```text
-Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 37, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
